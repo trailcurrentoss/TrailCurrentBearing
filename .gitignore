@@ -10,9 +10,12 @@
 # KiCAD cache
 fp-info-cache
 
-# PlatformIO
-.pio/
-.platformio/
+# ESP-IDF
+build/
+sdkconfig
+sdkconfig.old
+managed_components/
+dependencies.lock
 
 # IDEs
 .vscode/
@@ -23,12 +26,27 @@ fp-info-cache
 # OS files
 .DS_Store
 Thumbs.db
-.AppleDouble
-.LSOverride
 
-# Local development/agent files
-CLAUDE.md
+# AI agent configuration (local only — never commit)
+.claude
 .claude/
+.claude.md
+CLAUDE.md
+CLAUDE.MD
+.cursorrules
+.cursor/
+.github/copilot*
+.aider*
+.continue/
+.codeium/
+.tabnine*
+.sourcery.yaml
+
+# CRITICAL: Secrets - never commit credentials
+secrets.h
+*.secrets
+.env
+credentials.json
 
 # Build outputs (not needed in repo)
 gerber/
@@ -43,11 +61,10 @@ fab/
 # Temporary/backup files
 *.orig
 *.tmp
-.~*
+*.zip
 
-# CRITICAL: Secrets - never commit credentials
-src/Secrets.cpp
-src/Secrets.cpp.template
-src/Secrets.h
-src/secrets.h
-src/Secrets.H
+# FreeCAD temporary and backup files
+.xdp-*
+*.FCBak*
+*.FCStd1
+*.FCStd2
