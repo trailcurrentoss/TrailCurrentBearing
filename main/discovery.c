@@ -1,4 +1,5 @@
 #include "discovery.h"
+#include "wifi_config.h"
 #include "ota.h"
 
 #include <string.h>
@@ -37,7 +38,7 @@ static volatile bool s_discovery_running = false;
 
 static void discovery_mdns_start(void)
 {
-    const char *hostname = ota_get_hostname();
+    const char *hostname = wifi_config_get_hostname();
 
     char canid_str[8];
     snprintf(canid_str, sizeof(canid_str), "0x%02X", CAN_STATUS_ID);
@@ -104,7 +105,7 @@ void discovery_init(void)
 
 static void discovery_task_fn(void *arg)
 {
-    if (!ota_has_credentials()) {
+    if (!wifi_config_has_credentials()) {
         ESP_LOGE(TAG, "Discovery triggered but no WiFi credentials — cannot respond");
         s_discovery_running = false;
         vTaskDelete(NULL);
@@ -152,10 +153,19 @@ static void discovery_task_fn(void *arg)
     vTaskDelete(NULL);
 }
 
+bool discovery_is_running(void)
+{
+    return s_discovery_running;
+}
+
 void discovery_handle_trigger(void)
 {
     if (s_discovery_running) {
         ESP_LOGW(TAG, "Discovery already in progress — ignoring trigger");
+        return;
+    }
+    if (ota_is_running()) {
+        ESP_LOGW(TAG, "OTA in progress — ignoring discovery trigger");
         return;
     }
     s_discovery_running = true;
