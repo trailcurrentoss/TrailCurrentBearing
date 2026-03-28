@@ -273,7 +273,7 @@ void app_main(void)
     ESP_LOGI(TAG, "Hostname: %s", wifi_config_get_hostname());
 
     // CAN runs in its own task so bus errors never block I2C
-    xTaskCreate(twai_task, "twai", 4096, NULL, 5, NULL);
+    xTaskCreatePinnedToCore(twai_task, "twai", 4096, NULL, 5, NULL, 1);
 
     // Main task: poll GNSS data via I2C
     while (1) {
