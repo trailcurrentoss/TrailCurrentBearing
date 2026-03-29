@@ -196,5 +196,13 @@ esp_err_t gnss_read(gnss_data_t *data)
     // Course over ground (regs 26-28): bit 7 of high byte is sign flag
     data->course = (double)((((uint16_t)buf[26] & 0x7F) << 8) | buf[27]) + (double)buf[28] / 100.0;
 
+    // Read constellation mode from config register (not in the data block)
+    uint8_t mode;
+    if (gnss_read_regs(REG_GNSS_MODE, &mode, 1) == ESP_OK) {
+        data->gnss_mode = mode;
+    } else {
+        data->gnss_mode = 0;
+    }
+
     return ESP_OK;
 }
