@@ -15,8 +15,8 @@ static const char *TAG = "bearing";
 // Waveshare ESP32-S3-RS485-CAN pin assignments
 #define CAN_TX_PIN   15
 #define CAN_RX_PIN   16
-#define I2C_SDA_PIN  44
-#define I2C_SCL_PIN  3
+#define I2C_SDA_PIN  1
+#define I2C_SCL_PIN  2
 
 // CAN message identifiers (TX — GNSS data)
 #define CAN_ID_DATETIME   0x06

@@ -62,8 +62,8 @@ static const char *TAG = "gnss";
 #define REG_SLEEP_MODE 35   // power control (0x00 = enable, 0x01 = disable)
 #define REG_RGB_MODE   36   // RGB LED (0x05 = on, 0x02 = off)
 
-static i2c_master_bus_handle_t s_bus;
-static i2c_master_dev_handle_t s_dev;
+static i2c_master_bus_handle_t s_bus = NULL;
+static i2c_master_dev_handle_t s_dev = NULL;
 
 static esp_err_t gnss_write_reg(uint8_t reg, uint8_t val)
 {
@@ -76,8 +76,23 @@ static esp_err_t gnss_read_regs(uint8_t start_reg, uint8_t *buf, size_t len)
     return i2c_master_transmit_receive(s_dev, &start_reg, 1, buf, len, -1);
 }
 
+static void gnss_cleanup(void)
+{
+    if (s_dev) {
+        i2c_master_bus_rm_device(s_dev);
+        s_dev = NULL;
+    }
+    if (s_bus) {
+        i2c_del_master_bus(s_bus);
+        s_bus = NULL;
+    }
+}
+
 esp_err_t gnss_init(int sda_pin, int scl_pin)
 {
+    // Clean up any prior failed init
+    gnss_cleanup();
+
     i2c_master_bus_config_t bus_cfg = {
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .i2c_port = I2C_NUM_0,
@@ -89,6 +104,7 @@ esp_err_t gnss_init(int sda_pin, int scl_pin)
     esp_err_t err = i2c_new_master_bus(&bus_cfg, &s_bus);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to create I2C bus: %s", esp_err_to_name(err));
+        s_bus = NULL;
         return err;
     }
 
@@ -100,6 +116,7 @@ esp_err_t gnss_init(int sda_pin, int scl_pin)
     err = i2c_master_bus_add_device(s_bus, &dev_cfg, &s_dev);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Failed to add GNSS device: %s", esp_err_to_name(err));
+        gnss_cleanup();
         return err;
     }
 
@@ -108,6 +125,7 @@ esp_err_t gnss_init(int sda_pin, int scl_pin)
     err = gnss_read_regs(0x00, &probe, 1);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "GNSS device not found at 0x%02X", GNSS_I2C_ADDR);
+        gnss_cleanup();
         return ESP_FAIL;
     }
 
