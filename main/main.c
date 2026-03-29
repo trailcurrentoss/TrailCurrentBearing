@@ -260,6 +260,13 @@ void app_main(void)
     ota_init();
     discovery_init();
 
+    ESP_LOGI(TAG, "=== TrailCurrent Bearing ===");
+    ESP_LOGI(TAG, "Hostname: %s", wifi_config_get_hostname());
+
+    // CAN runs in its own task — start before GNSS so discovery/OTA work
+    // even while waiting for the GNSS module
+    xTaskCreatePinnedToCore(twai_task, "twai", 4096, NULL, 5, NULL, 1);
+
     // Initialize DFRobot GNSS module via I2C
     while (gnss_init(I2C_SDA_PIN, I2C_SCL_PIN) != ESP_OK) {
         ESP_LOGW(TAG, "GNSS module not found, retrying...");
@@ -268,12 +275,6 @@ void app_main(void)
     gnss_enable_power();
     gnss_set_mode(GNSS_MODE_GPS_BEIDOU_GLONASS);
     gnss_set_rgb_off();
-
-    ESP_LOGI(TAG, "=== TrailCurrent Bearing ===");
-    ESP_LOGI(TAG, "Hostname: %s", wifi_config_get_hostname());
-
-    // CAN runs in its own task so bus errors never block I2C
-    xTaskCreatePinnedToCore(twai_task, "twai", 4096, NULL, 5, NULL, 1);
 
     // Main task: poll GNSS data via I2C
     while (1) {
