@@ -47,6 +47,7 @@ esp_err_t gnss_set_mode(uint8_t mode);
 /**
  * Turn off the on-board RGB LED to save power.
  */
+esp_err_t gnss_set_rgb_on(void);
 esp_err_t gnss_set_rgb_off(void);
 
 /**

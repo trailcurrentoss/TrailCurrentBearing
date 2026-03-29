@@ -274,7 +274,7 @@ void app_main(void)
     }
     gnss_enable_power();
     gnss_set_mode(GNSS_MODE_GPS_BEIDOU_GLONASS);
-    gnss_set_rgb_off();
+    gnss_set_rgb_on();
 
     // Main task: poll GNSS data via I2C
     while (1) {

@@ -144,6 +144,11 @@ esp_err_t gnss_set_mode(uint8_t mode)
     return gnss_write_reg(REG_GNSS_MODE, mode);
 }
 
+esp_err_t gnss_set_rgb_on(void)
+{
+    return gnss_write_reg(REG_RGB_MODE, 0x05);
+}
+
 esp_err_t gnss_set_rgb_off(void)
 {
     return gnss_write_reg(REG_RGB_MODE, 0x02);
