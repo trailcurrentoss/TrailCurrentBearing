@@ -131,6 +131,7 @@ This means unplugging a module causes it to gracefully back off, and plugging it
 | `0x00` | OTA Trigger | `[mac0, mac1, mac2]` — target device by last 3 MAC bytes |
 | `0x01` | WiFi Config | Chunked credential provisioning (see below) |
 | `0x02` | Discovery | Broadcast trigger for mDNS self-discovery |
+| `0x04` | Version Report | Sent on boot: `[mac3, mac4, mac5, major, minor, patch]` — reports running firmware version to Headwaters |
 
 ### WiFi Credential Provisioning (CAN ID 0x01)
 
