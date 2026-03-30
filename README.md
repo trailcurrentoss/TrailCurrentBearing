@@ -1,6 +1,6 @@
 # TrailCurrent Bearing
 
-![TrailCurrent Bearing](DOCS/images/bearing_assembled.png)
+![TrailCurrent Bearing](DOCS/images/bearing_product_render.png)
 
 GNSS (Global Navigation Satellite System) module for precise positioning, timing, and navigation. Part of the [TrailCurrent](https://trailcurrent.com) open-source vehicle platform.
 
