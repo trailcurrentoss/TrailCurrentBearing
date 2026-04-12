@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 540" font-family="Inter, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr-i2c" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#0d6efd"/>
+    </marker>
+    <marker id="arr-can" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#198754"/>
+    </marker>
+    <marker id="arr-pwr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#dc3545"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="540" fill="#f8f9fa"/>
+
+  <!-- Title bar -->
+  <rect width="1100" height="54" fill="#ffffff"/>
+  <rect y="54" width="1100" height="3" fill="#52a441"/>
+  <text x="24" y="35" font-size="16" font-weight="700" fill="#52a441">TrailCurrent Bearing</text>
+  <text x="250" y="35" font-size="13" fill="#495057">Waveshare ESP32-S3-RS485-CAN — External Connections</text>
+
+  <!-- =============== BOARD (top view) =============== -->
+  <rect x="290" y="160" width="520" height="160" fill="#2a5fa5" stroke="#1a3f75" stroke-width="2" rx="6"/>
+  <text x="550" y="184" text-anchor="middle" font-size="11" fill="#8ab4f8" font-weight="600">ESP32-S3-RS485-CAN (Top View)</text>
+
+  <!-- VCC/GND power terminal (left end, top) -->
+  <rect x="290" y="170" width="50" height="32" fill="#dc3545" stroke="#a52834" stroke-width="1.5" rx="2"/>
+  <text x="315" y="190" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">PWR</text>
+
+  <!-- USB-C (left end, bottom) -->
+  <rect x="273" y="252" width="28" height="44" fill="#6c757d" stroke="#495057" stroke-width="1.5" rx="2"/>
+  <text x="287" y="278" text-anchor="middle" font-size="8" fill="#fff" font-weight="600">USB-C</text>
+
+  <!-- I2C JST connector (right next to USB-C, on the board edge) -->
+  <rect x="308" y="262" width="36" height="24" fill="#0d6efd" stroke="#0a58ca" stroke-width="1.5" rx="2"/>
+  <text x="326" y="278" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">I2C JST</text>
+
+  <!-- ESP32-S3 chip -->
+  <rect x="510" y="220" width="80" height="60" fill="#1a3f75" stroke="#0d2b52" stroke-width="1" rx="2"/>
+  <text x="550" y="246" text-anchor="middle" font-size="9" fill="#8ab4f8">ESP32-S3</text>
+  <text x="550" y="260" text-anchor="middle" font-size="9" fill="#8ab4f8">WROOM</text>
+
+  <!-- CAN terminal block (right end, top) -->
+  <rect x="795" y="180" width="30" height="48" fill="#198754" stroke="#146c43" stroke-width="1.5" rx="2"/>
+  <text x="810" y="200" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">CAN</text>
+  <text x="810" y="214" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">H/L</text>
+
+  <!-- RS485 terminal block (right end, bottom) -->
+  <rect x="795" y="244" width="30" height="48" fill="#6c757d" stroke="#495057" stroke-width="1.5" rx="2"/>
+  <text x="810" y="264" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">RS485</text>
+  <text x="810" y="278" text-anchor="middle" font-size="7" fill="#dee2e6">unused</text>
+
+  <!-- =============== POWER INPUT TAG (left, top) =============== -->
+  <rect x="60" y="170" width="180" height="32" fill="#dc3545" stroke="#a52834" stroke-width="1" rx="4"/>
+  <text x="150" y="191" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">6-36V Power Input</text>
+
+  <!-- Power → board terminal -->
+  <polyline points="240,186 290,186"
+    fill="none" stroke="#dc3545" stroke-width="2" marker-end="url(#arr-pwr)"/>
+
+  <!-- =============== CAN BUS TAG (right, top) =============== -->
+  <rect x="860" y="190" width="180" height="32" fill="#198754" stroke="#146c43" stroke-width="1" rx="4"/>
+  <text x="950" y="205" text-anchor="middle" font-size="12" font-weight="600" fill="#fff">CAN Bus</text>
+  <text x="950" y="218" text-anchor="middle" font-size="9" fill="#d1e7dd">500 kbps</text>
+
+  <!-- CAN tag → board terminal -->
+  <polyline points="860,206 830,206"
+    fill="none" stroke="#198754" stroke-width="2" marker-end="url(#arr-can)"/>
+
+  <!-- =============== EXTERNAL GNSS MODULE =============== -->
+  <rect x="180" y="380" width="280" height="100" fill="#fff3cd" stroke="#e0a800" stroke-width="2" rx="8"/>
+  <text x="320" y="408" text-anchor="middle" font-size="13" font-weight="700" fill="#664d03">DFRobot Gravity GNSS</text>
+  <text x="320" y="427" text-anchor="middle" font-size="11" fill="#997404">GPS + BeiDou + GLONASS</text>
+  <text x="320" y="445" text-anchor="middle" font-size="10" fill="#997404">I2C interface (4-pin Gravity cable)</text>
+  <text x="320" y="462" text-anchor="middle" font-size="9" fill="#997404">VCC · GND · SDA · SCL</text>
+
+  <!-- I2C JST connector → GNSS module -->
+  <polyline points="326,290 326,360 320,360 320,376"
+    fill="none" stroke="#0d6efd" stroke-width="2.5" stroke-dasharray="6,3" marker-end="url(#arr-i2c)"/>
+  <text x="335" y="335" font-size="11" fill="#0d6efd" font-weight="600">I2C Cable</text>
+
+  <!-- =============== CAN BUS PROTOCOL SUMMARY =============== -->
+  <rect x="500" y="370" width="576" height="148" fill="#ffffff" stroke="#dee2e6" stroke-width="1.5" rx="6"/>
+  <text x="788" y="394" text-anchor="middle" font-size="13" font-weight="700" fill="#212529">CAN Bus Messages</text>
+
+  <!-- TX messages -->
+  <text x="520" y="416" font-size="11" fill="#198754" font-weight="700">TX (GNSS Data @ 30 Hz)</text>
+  <text x="520" y="432" font-size="10" fill="#495057">0x06  DateTime  [yr_H, yr_L, mo, day, hr, min, sec]</text>
+  <text x="520" y="446" font-size="10" fill="#495057">0x07  Navigation  [sats, spd_H, spd_L, crs_H, crs_L, mode]</text>
+  <text x="520" y="460" font-size="10" fill="#495057">0x08  Altitude  [alt_3, alt_2, alt_1, alt_0]</text>
+  <text x="520" y="474" font-size="10" fill="#495057">0x09  LatLon  [lat_s, lat_2, lat_1, lat_0, lon_s, lon_2, lon_1, lon_0]</text>
+
+  <!-- RX messages -->
+  <text x="520" y="494" font-size="11" fill="#dc3545" font-weight="700">RX (Control)</text>
+  <text x="520" y="508" font-size="10" fill="#495057">0x00  OTA Trigger     0x01  WiFi Config     0x02  Discovery</text>
+
+  <!-- =============== LEGEND =============== -->
+  <rect x="860" y="72" width="216" height="80" fill="#ffffff" stroke="#dee2e6" stroke-width="1.5" rx="6"/>
+  <text x="968" y="92" text-anchor="middle" font-size="12" font-weight="700" fill="#212529">Legend</text>
+
+  <rect x="876" y="100" width="14" height="14" fill="#dc3545" rx="3"/>
+  <text x="896" y="112" font-size="10" fill="#212529">Power Input (6-36V)</text>
+
+  <rect x="876" y="118" width="14" height="14" fill="#0d6efd" rx="3"/>
+  <text x="896" y="130" font-size="10" fill="#212529">I2C — to GNSS module</text>
+
+  <rect x="876" y="136" width="14" height="14" fill="#198754" rx="3"/>
+  <text x="896" y="148" font-size="10" fill="#212529">CAN Bus (500 kbps)</text>
+
+  <!-- Footer -->
+  <rect y="510" width="1100" height="30" fill="#ffffff"/>
+  <rect y="510" width="1100" height="1" fill="#dee2e6"/>
+  <text x="24" y="529" font-size="9" fill="#52a441" font-weight="600">TrailCurrent</text>
+  <text x="110" y="529" font-size="9" fill="#6c757d">Bearing v1.0 — external connections</text>
+</svg>

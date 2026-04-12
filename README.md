@@ -16,18 +16,16 @@ TrailCurrent Bearing is a standalone GNSS module that reads data from a DFRobot 
 
 ## Hardware Overview
 
-- **Microcontroller:** ESP32-WROOM-32
+- **Microcontroller:** ESP32-S3 (Waveshare ESP32-S3-RS485-CAN board)
 - **GNSS Receiver:** DFRobot Gravity GNSS (I2C, multi-constellation)
-- **CAN Bus:** 500 kbps via TWAI driver (GPIO 15 TX, GPIO 13 RX)
-- **I2C:** GPIO 21 SDA, GPIO 22 SCL
+- **CAN Bus:** 500 kbps via TWAI driver (GPIO 15 TX, GPIO 16 RX)
+- **I2C:** GPIO 1 SDA, GPIO 2 SCL
 - **Flash:** 4 MB with dual OTA partitions
 
 ### Components
 
 - DFRobot Gravity GNSS module (GPS + BeiDou + GLONASS)
-- ESP32 microcontroller
-- CAN transceiver
-- Buck converter for regulated power supply
+- Waveshare ESP32-S3-RS485-CAN module
 - JST XH connectors for power and signal distribution
 
 ### KiCAD Library Dependencies
@@ -65,10 +63,28 @@ source ~/esp/v5.5.2/esp-idf/export.sh
 ### Build and Flash
 
 ```bash
-idf.py set-target esp32
+idf.py set-target esp32s3
 idf.py build
-idf.py -p /dev/ttyUSB0 flash monitor
+idf.py -p /dev/ttyACM0 flash monitor
 ```
+
+### Release Binaries
+
+The firmware produces two binary types for different deployment methods:
+
+| Binary | Purpose | How it's used |
+|--------|---------|---------------|
+| `bearing.bin` | App-only image | OTA updates via Headwaters (`esp_ota_write` validates the app header) |
+| `bearing_merged.bin` | Full flash image (bootloader + partition table + OTA data + app) | Web flasher (writes entire flash at offset 0x0) |
+
+After building, run the merge script to create both:
+
+```bash
+idf.py build
+./merge.sh
+```
+
+Attach **both** files to each GitHub release. The merged binary cannot be used for OTA — `esp_ota_end()` validates an app image header, and the merged binary starts with the bootloader, which would fail validation.
 
 ### OTA Firmware Update
 
@@ -76,7 +92,7 @@ Firmware can be updated over-the-air via the CAN bus trigger protocol:
 
 1. Send CAN ID `0x00` with the target device's last 3 MAC bytes
 2. The device joins WiFi (credentials must be provisioned first) and starts an HTTP server
-3. Upload the new firmware binary:
+3. Upload the **app-only** firmware binary:
 
 ```bash
 curl -X POST http://esp32-XXYYZZ.local/ota --data-binary @build/bearing.bin
