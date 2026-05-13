@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -39,13 +40,18 @@ static const char *TAG = "bearing";
 
 // ---------------------------------------------------------------------------
 // Shared GNSS data (written by main task, read by CAN task)
+// volatile prevents single-access reordering but does NOT make the multi-field
+// snapshot atomic — a spinlock guards the whole group so the CAN task never
+// captures torn values across a GNSS update (e.g. mixed minute/second on the
+// rollover that made the time appear to "jump").
 // ---------------------------------------------------------------------------
 
-static volatile uint16_t g_year;
-static volatile uint8_t  g_month, g_day, g_hour, g_minute, g_second;
-static volatile float    g_latitude, g_longitude;
-static volatile double   g_altitude, g_speed, g_course;
-static volatile uint8_t  g_satellites, g_gnss_mode;
+static portMUX_TYPE g_gnss_mux = portMUX_INITIALIZER_UNLOCKED;
+static uint16_t g_year;
+static uint8_t  g_month, g_day, g_hour, g_minute, g_second;
+static float    g_latitude, g_longitude;
+static double   g_altitude, g_speed, g_course;
+static uint8_t  g_satellites, g_gnss_mode;
 
 // ---------------------------------------------------------------------------
 // CAN data encoding helpers
@@ -166,13 +172,22 @@ static void twai_task(void *arg)
         if (!bus_off && (now_us - last_tx_us >= effective_period)) {
             last_tx_us = now_us;
 
-            // Snapshot shared GNSS data
-            uint16_t year = g_year;
-            uint8_t month = g_month, day = g_day;
-            uint8_t hour = g_hour, minute = g_minute, second = g_second;
-            float lat = g_latitude, lon = g_longitude;
-            double alt = g_altitude, spd = g_speed, crs = g_course;
-            uint8_t sats = g_satellites, mode = g_gnss_mode;
+            // Snapshot shared GNSS data atomically — without the spinlock the
+            // CAN task could read e.g. minute from one sample and second from
+            // the next, producing jumps on every rollover boundary.
+            uint16_t year;
+            uint8_t month, day, hour, minute, second;
+            float lat, lon;
+            double alt, spd, crs;
+            uint8_t sats, mode;
+            taskENTER_CRITICAL(&g_gnss_mux);
+            year = g_year;
+            month = g_month; day = g_day;
+            hour = g_hour; minute = g_minute; second = g_second;
+            lat = g_latitude; lon = g_longitude;
+            alt = g_altitude; spd = g_speed; crs = g_course;
+            sats = g_satellites; mode = g_gnss_mode;
+            taskEXIT_CRITICAL(&g_gnss_mux);
 
             // 0x06: DateTime [year_h, year_l, month, day, hour, minute, second]
             twai_message_t m_dt = {
@@ -264,15 +279,34 @@ void app_main(void)
     gnss_set_rgb_on();
 
     // Main task: poll GNSS data via I2C
+    uint32_t log_counter = 0;
     while (1) {
         gnss_data_t data;
         if (gnss_read(&data) == ESP_OK) {
-            g_year      = data.year;
-            g_month     = data.month;
-            g_day       = data.day;
-            g_hour      = data.hour;
-            g_minute    = data.minute;
-            g_second    = data.second;
+            bool date_valid =
+                data.year  >= 2025 && data.year  <= 2099 &&
+                data.month >= 1    && data.month <= 12 &&
+                data.day   >= 1    && data.day   <= 31 &&
+                data.hour  <= 23 &&
+                data.minute <= 59 &&
+                data.second <= 60;
+
+            if (++log_counter >= (1000 / GNSS_POLL_MS)) {
+                log_counter = 0;
+                ESP_LOGI(TAG, "GNSS raw: %04u-%02u-%02u %02u:%02u:%02u  sats=%u  date_valid=%d",
+                         data.year, data.month, data.day,
+                         data.hour, data.minute, data.second,
+                         data.satellites, date_valid);
+            }
+            taskENTER_CRITICAL(&g_gnss_mux);
+            if (date_valid) {
+                g_year      = data.year;
+                g_month     = data.month;
+                g_day       = data.day;
+                g_hour      = data.hour;
+                g_minute    = data.minute;
+                g_second    = data.second;
+            }
             g_latitude  = data.latitude;
             g_longitude = data.longitude;
             g_altitude  = data.altitude;
@@ -280,6 +314,7 @@ void app_main(void)
             g_speed     = data.speed;
             g_course    = data.course;
             g_gnss_mode = data.gnss_mode;
+            taskEXIT_CRITICAL(&g_gnss_mux);
         }
         vTaskDelay(pdMS_TO_TICKS(GNSS_POLL_MS));
     }
